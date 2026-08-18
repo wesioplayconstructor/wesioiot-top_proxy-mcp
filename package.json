@@ -1,0 +1,30 @@
+{
+  "name": "wesioiot-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for MiniMax media via wesioiot proxy — TTS, image, video, music",
+  "main": "build/index.js",
+  "type": "module",
+  "bin": {
+    "wesioiot-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "build": "node build/index.js --mode stdio",
+    "start": "node build/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "wesioiot",
+    "minimax",
+    "proxy",
+    "tts",
+    "image",
+    "video",
+    "music"
+  ],
+  "author": "Hermes Zeta",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.7.0",
+    "axios": "^1.8.4"
+  }
+}

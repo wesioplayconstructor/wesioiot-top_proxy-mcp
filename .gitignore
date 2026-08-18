@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Secrets / local config
+.env
+.env.local
+*.key
+*.token
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Test artifacts
+test-output/
+*.mp3
+*.mp4
+*.wav
+*.jpg
+*.png
