@@ -53,7 +53,7 @@ export class TTSAPI {
 
     const audioHex = response?.data?.audio;
     if (!audioHex) {
-      throw new WesioiotMCPError(`TTS failed: ${JSON.stringify(response)}`);
+      throw new WesioiotMCPError(`Falha no TTS: ${JSON.stringify(response)}`);
     }
 
     const audioBytes = Buffer.from(audioHex, 'hex');

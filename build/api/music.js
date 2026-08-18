@@ -54,12 +54,12 @@ export class MusicAPI {
       };
     }
 
-    throw new WesioiotMCPError(`Music gen failed: ${JSON.stringify(response)}`);
+    throw new WesioiotMCPError(`Falha na geração de música: ${JSON.stringify(response)}`);
   }
 
   async queryMusic(taskId) {
     if (!taskId) {
-      throw new WesioiotMCPError('task_id is required');
+      throw new WesioiotMCPError('O parâmetro task_id é obrigatório');
     }
 
     const response = await this.api.get('/v1/query/music_generation', { task_id: taskId });

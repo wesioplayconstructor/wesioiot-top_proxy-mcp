@@ -1,121 +1,121 @@
 # wesioiot-mcp
 
-MCP server for **MiniMax media** routed through the `wesioiot` proxy (`api.wesioiot.top`).
+MCP server para mídia MiniMax (TTS, imagem, vídeo, música) roteada pelo proxy wesioiot (`api.wesioiot.top`).
 
-Provides 7 tools for AI agents:
+## Tools disponíveis (7)
 
-| Tool | Function |
-|------|----------|
-| `text_to_audio` | TTS (PT-BR voices, hex-encoded audio) |
-| `list_voices` | List 8 PT-BR voices available |
-| `text_to_image` | Image generation (image-01) |
-| `generate_video` | Video generation (Hailuo 2.3, async) |
-| `query_video_generation` | Poll video task status |
-| `music_generation` | Music generation (music-2.6, sync/async) |
-| `query_music_generation` | Poll music task status |
+| Tool | Função | Custo aprox. |
+|------|--------|--------------|
+| `text_to_audio` | TTS (vozes PT-BR, áudio hex) | $0.10 / 1k chars |
+| `list_voices` | Lista 8 vozes PT-BR disponíveis | grátis |
+| `text_to_image` | Geração de imagem (image-01) | $0.02 / imagem |
+| `generate_video` | Geração de vídeo (Hailuo 2.3, async) | $0.20–0.50 / vídeo |
+| `query_video_generation` | Polling de job de vídeo | grátis |
+| `music_generation` | Geração de música (music-2.6, sync/async) | $0.10 / música |
+| `query_music_generation` | Polling de job de música | grátis |
 
-## What is the wesioiot proxy?
+## O que é o proxy wesioiot
 
-`api.wesioiot.top` is an OpenAI-compatible proxy that fronts MiniMax's API. The proxy authenticates clients with `mmx-…` tokens (instead of MiniMax's direct `sk-cp-…` keys), enabling per-client rate limiting, audit logs, and quota tracking. This MCP server uses the proxy for all media calls, so the same token the chat provider uses also works here.
+`api.wesioiot.top` é um proxy OpenAI-compatible que faz frente à API da MiniMax. Ele autentica clientes com tokens `mmx-…` (em vez das chaves diretas `sk-cp-…` da MiniMax), permitindo rate-limit por cliente, log de auditoria e controle de cota. Este MCP usa o proxy para todas as chamadas de mídia, então o mesmo token que o chat usa funciona aqui.
 
-## Setup
+## Instalação
 
-### 1. Install dependencies
+### 1. Instalar dependências
 
 ```bash
 npm install
 ```
 
-Requires Node.js 20+.
+Requer Node.js 20+.
 
-### 2. Get a proxy token
+### 2. Obter um token do proxy
 
-You need an `mmx-…` API key issued by the wesioiot proxy. If you run the proxy, create a key in the dashboard or via the SQLite database:
+Você precisa de uma chave `mmx-…` emitida pelo proxy wesioiot. Se você roda o proxy, crie a chave pelo dashboard ou direto no SQLite:
 
 ```bash
 node -e "
 const Database = require('better-sqlite3');
-const db = new Database('/path/to/proxy/data/proxy.sqlite');
-const k = db.prepare('SELECT key FROM api_keys WHERE label=?').get('your-label');
+const db = new Database('/caminho/para/proxy/data/proxy.sqlite');
+const k = db.prepare('SELECT key FROM api_keys WHERE label=?').get('seu-label');
 console.log(k.key);
 "
 ```
 
-### 3. Configure the MCP server
+### 3. Configurar o MCP
 
-#### Option A — `hermes mcp add` (Hermes Agent)
+#### Opção A — `hermes mcp add` (Hermes Agent)
 
 ```bash
 printf "y\ny\n" | hermes mcp add wesioiot-mcp \
   --command node \
   --env WESIOIOT_API_KEY=mmx-... \
   --env WESIOIOT_API_HOST=https://api.wesioiot.top \
-  --env WESIOIOT_MCP_BASE_PATH=/path/to/output \
-  --args /absolute/path/to/wesioiot-mcp/build/index.js
+  --env WESIOIOT_MCP_BASE_PATH=/caminho/para/output \
+  --args /caminho/absoluto/para/wesioiot-mcp/build/index.js
 
-# The `hermes mcp add --env` flag has a known bug — it only saves the last env var.
-# Patch the missing env vars with:
+# Bug conhecido: o `hermes mcp add --env` só salva a última env var.
+# Patchear as outras com:
 hermes config set mcp_servers.wesioiot-mcp.env.WESIOIOT_API_KEY mmx-... --force
 hermes config set mcp_servers.wesioiot-mcp.env.WESIOIOT_API_HOST https://api.wesioiot.top --force
 hermes config set mcp_servers.wesioiot-mcp.enabled true --force
 ```
 
-#### Option B — Generic stdio MCP client
+#### Opção B — Cliente MCP genérico (stdio)
 
-Configure your client to launch:
+Configure seu cliente para executar:
 
 ```
-node /absolute/path/to/wesioiot-mcp/build/index.js
+node /caminho/absoluto/para/wesioiot-mcp/build/index.js
 ```
 
-with environment variables:
+Com as variáveis de ambiente:
 
-| Variable | Required | Default | Example |
-|----------|----------|---------|---------|
+| Variável | Obrigatório | Padrão | Exemplo |
+|----------|-------------|--------|---------|
 | `WESIOIOT_API_KEY` | ✅ | — | `mmx-3dc90e8e...` |
-| `WESIOIOT_API_HOST` | ❌ | `https://api.wesioiot.top` | custom proxy URL |
+| `WESIOIOT_API_HOST` | ❌ | `https://api.wesioiot.top` | URL custom do proxy |
 | `WESIOIOT_MCP_BASE_PATH` | ❌ | `/tmp` | `~/.cache/wesioiot-mcp` |
 
-### 4. Verify
+### 4. Validar
 
 ```bash
 hermes mcp test wesioiot-mcp
-# Expected: ✓ Connected (~20s) + 7 tools
+# Esperado: ✓ Connected (~20s) + 7 tools
 ```
 
-## Tool parameters
+## Parâmetros das tools
 
 ### `text_to_audio`
-- `text` (string, required) — text to synthesize
-- `voiceId` (string) — voice ID (default: `Portuguese_FascinatingBoy`)
+- `text` (string, obrigatório) — texto a sintetizar
+- `voiceId` (string) — ID da voz (padrão: `Portuguese_FascinatingBoy`)
 - `model` (string) — `speech-02-hd`, `speech-02-turbo`, `speech-2.6-hd`, `speech-2.8-turbo`
-- `speed` (number 0.5–2.0) — speech rate
+- `speed` (number 0.5–2.0) — velocidade da fala
 - `vol` (number 0.1–10.0) — volume
-- `pitch` (number -12 to 12) — pitch shift
-- `outputDirectory` (string) — where to save the MP3 (default: `WESIOIOT_MCP_BASE_PATH`)
+- `pitch` (number -12 a 12) — deslocamento de tom
+- `outputDirectory` (string) — onde salvar o MP3 (padrão: `WESIOIOT_MCP_BASE_PATH`)
 
 ### `text_to_image`
-- `prompt` (string, required) — image description
+- `prompt` (string, obrigatório) — descrição da imagem
 - `aspectRatio` (string) — `1:1`, `16:9`, `9:16`, etc.
-- `n` (number) — number of images (default 1)
-- `outputDirectory` (string) — where to save
+- `n` (number) — quantidade de imagens (padrão 1)
+- `outputDirectory` (string) — onde salvar
 
 ### `generate_video`
-- `prompt` (string, required) — video description
-- Returns a `taskId`. Use `query_video_generation` to poll.
+- `prompt` (string, obrigatório) — descrição do vídeo
+- Retorna um `taskId`. Use `query_video_generation` para checar.
 
 ### `music_generation`
-- `lyrics` (string, required) — song lyrics
-- `prompt` (string) — musical style description
-- `title` (string) — song title
-- `style` (string) — musical style
-- `outputDirectory` (string) — where to save
-- May return synchronously (direct audio) or async (task_id) depending on proxy.
+- `lyrics` (string, obrigatório) — letra da música
+- `prompt` (string) — descrição do estilo musical
+- `title` (string) — título da música
+- `style` (string) — estilo musical
+- `outputDirectory` (string) — onde salvar
+- Pode retornar sincronamente (áudio direto) ou assincronamente (task_id).
 
-## Available PT-BR voices
+## Vozes PT-BR disponíveis
 
 ```
-Portuguese_FascinatingBoy          (default)
+Portuguese_FascinatingBoy          (padrão)
 Portuguese_SmartYoungGirl
 Portuguese_ConfidentWoman
 Portuguese_Wiselady
@@ -125,7 +125,7 @@ Portuguese_ThoughtfulMan
 Portuguese_Strong-WilledBoy
 ```
 
-## Architecture
+## Arquitetura
 
 ```
 ┌──────────────┐   stdio    ┌──────────────────┐   HTTPS    ┌──────────────────┐
@@ -140,18 +140,18 @@ Portuguese_Strong-WilledBoy
                                                             └──────────────────┘
 ```
 
-The proxy audits every call, applies per-key rate limits, and forwards to the upstream MiniMax API. Your `mmx-…` token is only valid against the proxy.
+O proxy audita cada chamada, aplica rate-limit por chave e repassa para a API upstream da MiniMax. O token `mmx-…` só é válido contra o proxy.
 
-## Why a separate MCP?
+## Por que um MCP separado
 
-MiniMax's official `minimax-mcp` package connects directly to `api.minimax.io` with a personal `sk-cp-…` key. This server:
+O pacote oficial `minimax-mcp` da MiniMax conecta direto no `api.minimax.io` com chave pessoal `sk-cp-…`. Este server:
 
-- Uses your proxy token (`mmx-…`) so media goes through the same billing/audit pipeline as chat
-- Drops `voice_clone`, `voice_design`, and `play_audio` (not exposed by the proxy)
-- Keeps the same JSON-RPC / stdio interface, so any MCP-compatible client works
+- Usa seu token do proxy (`mmx-…`) — mídia passa pelo mesmo pipeline de billing/auditoria do chat
+- Remove `voice_clone`, `voice_design` e `play_audio` (não expostos pelo proxy)
+- Mantém a mesma interface JSON-RPC / stdio, então qualquer cliente MCP-compatível funciona
 
-You can run both MCPs in parallel: `minimax-mcp` for cloning voices, `wesioiot-mcp` for everything that should be billed to the proxy.
+Você pode rodar os dois MCPs em paralelo: `minimax-mcp` para clonar vozes, `wesioiot-mcp` para tudo que deve ser cobrado do proxy.
 
-## License
+## Licença
 
 MIT

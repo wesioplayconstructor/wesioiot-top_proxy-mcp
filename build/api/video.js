@@ -32,7 +32,7 @@ export class VideoAPI {
 
     const taskId = response?.data?.task_id || response?.task_id;
     if (!taskId) {
-      throw new WesioiotMCPError(`Video gen submit failed: ${JSON.stringify(response)}`);
+      throw new WesioiotMCPError(`Falha ao enviar job de vídeo: ${JSON.stringify(response)}`);
     }
 
     return {
@@ -46,7 +46,7 @@ export class VideoAPI {
 
   async queryVideo(taskId) {
     if (!taskId) {
-      throw new WesioiotMCPError('task_id is required');
+      throw new WesioiotMCPError('O parâmetro task_id é obrigatório');
     }
 
     const response = await this.api.get('/v1/query/video_generation', { task_id: taskId });

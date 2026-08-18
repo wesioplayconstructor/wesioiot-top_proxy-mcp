@@ -35,7 +35,7 @@ export class ImageAPI {
 
     const imageUrls = response?.data?.image_urls || response?.image_urls || [];
     if (!imageUrls || imageUrls.length === 0) {
-      throw new WesioiotMCPError(`Image gen failed: ${JSON.stringify(response)}`);
+      throw new WesioiotMCPError(`Falha na geração de imagem: ${JSON.stringify(response)}`);
     }
 
     // Try to download images locally

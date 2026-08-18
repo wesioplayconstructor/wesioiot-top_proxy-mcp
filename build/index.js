@@ -3,6 +3,6 @@ import { WesioiotMCPServer } from './mcp-server.js';
 
 const server = new WesioiotMCPServer();
 server.start().catch(err => {
-  console.error('wesioiot-mcp fatal:', err.message);
+  console.error('wesioiot-mcp erro fatal:', err.message);
   process.exit(1);
 });

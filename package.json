@@ -1,7 +1,7 @@
 {
   "name": "wesioiot-mcp",
   "version": "1.0.0",
-  "description": "MCP Server for MiniMax media via wesioiot proxy — TTS, image, video, music",
+  "description": "MCP para mídia MiniMax (TTS, imagem, vídeo, música) via proxy wesioiot api.wesioiot.top",
   "main": "build/index.js",
   "type": "module",
   "bin": {
@@ -19,7 +19,7 @@
     "tts",
     "image",
     "video",
-    "music"
+    "musica"
   ],
   "author": "Hermes Zeta",
   "license": "MIT",

@@ -10,9 +10,9 @@ export const ENV_API_KEY = 'WESIOIOT_API_KEY';
 export const ENV_API_HOST = 'WESIOIOT_API_HOST';
 export const ENV_BASE_PATH = 'WESIOIOT_MCP_BASE_PATH';
 
-export const ERROR_TEXT_REQUIRED = 'text is required';
-export const ERROR_PROMPT_REQUIRED = 'prompt is required';
-export const ERROR_API_KEY_MISSING = 'WESIOIOT_API_KEY environment variable is required';
+export const ERROR_TEXT_REQUIRED = 'O parâmetro text é obrigatório';
+export const ERROR_PROMPT_REQUIRED = 'O parâmetro prompt é obrigatório';
+export const ERROR_API_KEY_MISSING = 'A variável de ambiente WESIOIOT_API_KEY é obrigatória. Configure sua chave mmx-... do proxy wesioiot.';
 
 export const VALID_TTS_MODELS = [
   'speech-02-hd', 'speech-02-turbo',
