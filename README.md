@@ -11,8 +11,10 @@ MCP server para mídia MiniMax (TTS, imagem, vídeo, música) roteada pelo proxy
 | `text_to_image` | Geração de imagem (image-01) | $0.02 / imagem |
 | `generate_video` | Geração de vídeo (Hailuo 2.3, async) | $0.20–0.50 / vídeo |
 | `query_video_generation` | Polling de job de vídeo | grátis |
-| `music_generation` | Geração de música (music-2.6, sync/async) | $0.10 / música |
-| `query_music_generation` | Polling de job de música | grátis |
+| `music_generation` | Geração de música (`music-3.0` padrão; `music-2.6` legado) | US$ 0,15 / faixa de até 5 min, conforme tabela oficial MiniMax |
+| `query_music_generation` | Polling de job legado de música | grátis |
+
+**Disponibilidade:** desde 2026-08-20, a MiniMax não habilita a Music API hosted para novos usuários; somente clientes pagantes elegíveis preexistentes podem continuar. Se o upstream responder HTTP 410, a tool mostra o diagnóstico, não repete a chamada e não cria áudio/task. Não há fallback automático para a API direta.
 
 ## O que é o proxy wesioiot
 
@@ -106,11 +108,12 @@ hermes mcp test wesioiot-mcp
 
 ### `music_generation`
 - `lyrics` (string, obrigatório) — letra da música
-- `prompt` (string) — descrição do estilo musical
-- `title` (string) — título da música
-- `style` (string) — estilo musical
+- `prompt` (string) — descrição de gênero, instrumentos, clima e andamento
+- `model` — `music-3.0` padrão recomendado; `music-2.6` legado
+- `title` e `style` (opcionais) — incorporados ao `prompt`; não são enviados como campos não documentados
 - `outputDirectory` (string) — onde salvar
-- Pode retornar sincronamente (áudio direto) ou assincronamente (task_id).
+- Envia `audio_setting` MP3/44.1 kHz/256 kbps e salva `data.audio` hexadecimal; mantém retorno assíncrono legado se houver `task_id`.
+- Se HTTP 410: mostra diagnóstico, não repete chamada e não cria arquivo nem inventa `task_id`.
 
 ## Vozes PT-BR disponíveis
 

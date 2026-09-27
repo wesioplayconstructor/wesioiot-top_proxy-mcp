@@ -11,20 +11,40 @@ export class MusicAPI {
 
   async generateMusic(request) {
     const outputDir = request.outputDirectory || '/tmp';
+    const model = request.model || 'music-3.0';
     ensureDir(outputDir);
 
-    const requestData = { model: 'music-2.6' };
+    const requestData = {
+      model,
+      audio_setting: request.audioSetting || { sample_rate: 44100, bitrate: 256000, format: 'mp3' },
+    };
     if (request.prompt) requestData.prompt = request.prompt;
     if (request.lyrics) requestData.lyrics = request.lyrics;
-    if (request.title) requestData.title = request.title;
-    if (request.style) requestData.style = request.style;
+    if (request.lyricsOptimizer === true) requestData.lyrics_optimizer = true;
+    if (request.isInstrumental === true) requestData.is_instrumental = true;
 
     const filteredData = {};
     for (const [k, v] of Object.entries(requestData)) {
       if (v !== undefined) filteredData[k] = v;
     }
 
-    const response = await this.api.post('/v1/music_generation', filteredData);
+    let response;
+    try {
+      response = await this.api.post('/v1/music_generation', filteredData);
+    } catch (error) {
+      const status = Number(error?.response?.status) || null;
+      const data = error?.response?.data;
+      const message = typeof data?.message === 'string'
+        ? data.message
+        : (typeof data?.base_resp?.status_msg === 'string' ? data.base_resp.status_msg : error.message);
+      const statusLabel = status ? ` (HTTP ${status})` : '';
+      let errorMsg = `Falha na geração de música${statusLabel}: ${message}`;
+      if (status === 410) {
+        errorMsg += `\n\nATENÇÃO (Instrução ao Agente): A geração falhou definitivamente. Não houve task_id nem áudio criado; o diretório de saída (${outputDir}) é apenas local e não pode ser lido. PARE o processo. NÃO faça retry automático.`;
+      }
+      
+      throw new WesioiotMCPError(errorMsg);
+    }
 
     // Music can return sync (direct audio) or async (task_id)
     const audioHex = response?.data?.audio;
@@ -38,7 +58,7 @@ export class MusicAPI {
       return {
         outputFile: outFile,
         sizeBytes: audioBytes.length,
-        model: 'music-2.6',
+        model,
         mode: 'sync',
       };
     }
@@ -48,7 +68,7 @@ export class MusicAPI {
       return {
         taskId,
         status: 'processing',
-        model: 'music-2.6',
+        model,
         mode: 'async',
         message: 'Music is being generated. Poll with query_music_generation using the task_id.',
       };

@@ -22,4 +22,4 @@ export const VALID_TTS_MODELS = [
 
 export const VALID_IMAGE_MODELS = ['image-01'];
 export const VALID_VIDEO_MODELS = ['MiniMax-Hailuo-2.3'];
-export const VALID_MUSIC_MODELS = ['music-2.6'];
+export const VALID_MUSIC_MODELS = ['music-3.0', 'music-2.6'];

@@ -152,18 +152,28 @@ export class WesioiotMCPServer {
     // music_generation
     this.server.tool(
       'music_generation',
-      'Gera música a partir de letra e prompt de estilo usando o proxy wesioiot (MiniMax music-2.6). Pode retornar áudio direto (sync) ou task_id (async). Custo aproximado: $0.10/música.',
+      'Gera música pelo proxy wesioiot usando MiniMax Music 3.0 (requer acesso pago já habilitado na MiniMax; novas contas não têm acesso à API hosted desde 20/08/2026). Salva o áudio retornado pelo endpoint oficial; custo documentado: US$ 0,15 por faixa de até 5 minutos.',
       {
         lyrics: z.string().describe('Letra da música (obrigatório)'),
-        prompt: z.string().optional().describe('Descrição do estilo musical'),
-        title: z.string().optional().describe('Título da música'),
-        style: z.string().optional().describe('Estilo musical (gênero, energia)'),
+        prompt: z.string().optional().describe('Descrição do gênero, instrumentos, clima e andamento'),
+        model: z.enum(['music-3.0', 'music-2.6']).optional().default('music-3.0').describe('Modelo (music-3.0 recomendado; music-2.6 legado)'),
+        title: z.string().optional().describe('Título sugerido; incluído no prompt, não é campo separado da API'),
+        style: z.string().optional().describe('Estilo musical, incorporado ao prompt'),
         outputDirectory: z.string().optional().describe('Diretório de saída'),
       },
-      async ({ prompt, lyrics, title, style, outputDirectory }) => {
+      async ({ prompt, lyrics, model, title, style, outputDirectory }) => {
         try {
+          const composedPrompt = [
+            style,
+            title ? `Suggested title: ${title}` : null,
+            prompt,
+          ].filter(Boolean).join('. ');
           const result = await this.musicApi.generateMusic({
-            prompt, lyrics, title, style, outputDirectory: outputDirectory || this.basePath,
+            model,
+            prompt: composedPrompt || undefined,
+            lyrics,
+            audioSetting: { sample_rate: 44100, bitrate: 256000, format: 'mp3' },
+            outputDirectory: outputDirectory || this.basePath,
           });
           if (result.mode === 'sync') {
             return {

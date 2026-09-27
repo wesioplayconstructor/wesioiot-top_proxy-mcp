@@ -1,0 +1,15 @@
+{
+  "name": "vscode-mcp-proxy",
+  "version": "1.0.0",
+  "description": "Streamable HTTP proxy for Hermes MCPs, with bearer token auth. Exposes stdio MCPs to VS Code.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.7.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}
